@@ -1,0 +1,30 @@
+<style type="text/css">
+
+body {
+  font: 100%/1.6 cambria, palatino, georgia, serif;
+}
+
+#options article {
+  margin-bottom: 10px;
+}
+
+#options aside {
+  font-size: 13px;
+}
+
+#resultTextAreaContainer {
+  height: 600px;
+  overflow-y: scroll;
+  border: 1px solid black;
+}
+
+#searchTextbox {
+  padding: 5px;
+  width: 200px;
+}
+
+#keysTextbox {
+  width: 200px;
+}
+
+</style>
