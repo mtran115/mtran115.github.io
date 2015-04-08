@@ -1,0 +1,1309 @@
+<!DOCTYPE>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Rapid Radiology Search</title>
+  <link href="jquery-ui.css" rel="stylesheet" type="text/css"/>
+  <script src="jquery-1.11.0.min.js"></script>
+  <script src="underscore-min.js"></script>
+  <script src="fuse.min.js"></script>
+  <script src="fiber.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="../bootstrap.min.css" type="text/css" media="all" />
+</head>
+
+
+<body>
+  <div class="container" style="">
+
+    <section id="options">
+
+      <h2>Options</h2>
+
+      <h3>Fuse specific options</h3>
+
+      <article>
+        <input type="checkbox" id="caseSensitiveCheckbox" />
+        <label for="caseSensitiveCheckbox">Case sensitive</label>
+        <aside>
+          Indicates whether comparisons should be case sensitive
+        </aside>
+      </article>
+
+      <article>
+        <input type="checkbox" id="scoreCheckbox" checked="checked"/>
+        <label for="scoreCheckbox">Include score</label>
+        <aside>
+          Whether the score should be included in the result set
+        </aside>
+      </article>
+
+      <article>
+        <input type="checkbox" id="sortCheckbox" checked="checked" />
+        <label for="sortCheckbox">Sort</label>
+        <aside>
+          Whether to sort the result list, by score
+        </aside>
+      </article>
+
+      <article>
+        <label for="identifierTextbox">ID</label>
+        <input type="text" id="identifierTextbox" />
+        <aside>
+          The name of the identifier property. If specified, the returned result will be a list of the items' identifiers, otherwise it will be a list of the items
+        </aside>
+      </article>
+
+      <article>
+        <label for="keysTextbox">Keys</label>
+        <input type="text" id="keysTextbox" value="dictation" />
+        <aside>
+          List of properties that will be searched. This also supports nested properties such as "author.firstName"
+        </aside>
+      </article>
+
+      <h3>Bitap specific options</h3>
+
+      <article>
+        <label for="locationRange">Location</label>
+        <input type="number" id="locationRange" min="0" max="100" value="0">
+        <aside>
+          Determines approximately where in the text is the pattern expected to be found
+        </aside>
+      </article>
+
+      <article>
+        <label for="thresholdRange">Threshold</label>
+        <input type="number" id="thresholdRange" min="0" step="0.1" max="1" value="0.6">
+        <aside>
+          At what point does the match algorithm give up. A threshold of 0.0 requires a perfect match (of both letters and location), a threshold of 1.0 would match anything
+        </aside>
+      </article>
+
+      <article>
+        <label for="distanceRange">Distance</label>
+        <input type="number" id="distanceRange" min="0" max="1000" value="100">
+        <aside>
+          Determines how close the match must be to the fuzzy location (specified by location). An exact letter match which is distance characters away from the fuzzy location would score as a complete mismatch. A distance of 0 requires the match be at the exact location specified, a threshold of 1000 would require a perfect match to be within 800 characters of the location to be found using a threshold of 0.8.
+        </aside>
+      </article>
+
+      <article>
+        <label for="maxPatternLength">Max pattern length</label>
+        <input type="number" id="maxPatternLength" min="0" max="64" value="32">
+        <aside>
+          The maximum length of the pattern. The longer the pattern, the more intensive the search operation will be. Whenever the pattern exceeds the maxPatternLength, an error will be thrown. Why is this important? Read this.
+        </aside>
+      </article>
+
+    </section>
+
+    <section id="js" style="visibility: hidden;">
+      <h2>JavaScript</h2>
+      <pre>
+        <code id="jsTextArea"></code>
+      </pre>
+    </section>
+
+  </div>
+
+
+  <div class="container">
+    <section id="search">
+      <h2>Search</h2>
+      <input type="text" id="searchTextbox" />
+    </section>
+
+    <section id="output">
+      <h2>Result</h2>
+
+      <label>Search time:</label>
+      <span id="searchTimeLabel"></span>
+
+      <pre id="resultTextAreaContainer">
+        <code id="resultTextArea"></code>
+      </pre>
+    </section>
+
+  </div>
+
+
+  <br>
+  <br>
+  <br>
+  <br>
+
+  <script>
+
+    $(function (window) {
+
+      // Mixins
+      var Mixins = {};
+      Mixins.Event = function (base) {
+        return  {
+          _hook: function () {
+            if (!this._$hook) {
+              this._$hook = $({});
+            }
+            return this._$hook;
+          },
+          on: function () {
+            var hook = this._hook();
+            hook.on.apply(hook, arguments);
+          },
+          off: function () {
+            var hook = this._hook();
+            hook.off.apply(hook, arguments);
+          },
+          trigger: function () {
+            var hook = this._hook();
+            hook.trigger.apply(hook, arguments);
+          }
+        };
+      };
+
+      // Core
+      var App = {};
+
+      App.Options = Fiber.extend(function() {
+        return {
+          init: function() {
+            this.setupNodes();
+            this.bindEvents();
+            this.data = {};
+
+            _.each(this.checkboxItems, _.bind(function(item) {
+              this.setupCheckboxItems(item, false);
+            }, this));
+
+            _.each(this.rangeItems, _.bind(function(item) {
+              this.setupRangeItems(item, false);
+            }, this));
+
+            this.setupKeys(false);
+
+            this.setupIdentifier(false);
+
+            this.setupPatternLength(false);
+          },
+          setupNodes: function() {
+            this.$caseSensitiveCheckbox = $('#caseSensitiveCheckbox');
+            this.$scoreCheckbox = $('#scoreCheckbox');
+            this.$sortCheckbox = $('#sortCheckbox');
+            this.$identifierTextbox = $('#identifierTextbox');
+            this.$keysTextbox = $('#keysTextbox');
+            this.$locationRange = $('#locationRange');
+            this.$thresholdRange = $('#thresholdRange');
+            this.$distanceRange = $('#distanceRange');
+            this.$maxPatternLength = $('#maxPatternLength');
+
+            this.checkboxItems = [{
+              node: this.$caseSensitiveCheckbox,
+              name: 'caseSensitive'
+            }, {
+              node: this.$scoreCheckbox,
+              name: 'includeScore'
+            }, {
+              node: this.$sortCheckbox,
+              name: 'shouldSort'
+            }];
+
+            this.rangeItems = [{
+              node: this.$thresholdRange,
+              name: 'threshold'
+            }, {
+              node: this.$locationRange,
+              name: 'location'
+            }, {
+              node: this.$distanceRange,
+              name: 'distance'
+            }];
+          },
+          bindEvents: function() {
+            // Checkboxes
+            _.each(this.checkboxItems, _.bind(function(item) {
+              item.node.on('change', _.bind(function() {
+                this.setupCheckboxItems(item, true);
+              }, this));
+            }, this));
+
+            // Ranges
+            _.each(this.rangeItems, _.bind(function(item) {
+              item.node.on('change', _.bind(function() {
+                this.setupRangeItems(item, true);
+              }, this));
+            }, this));
+
+            this.$identifierTextbox.on('change', _.bind(this.setupIdentifier, this));
+
+            // keys
+            this.$keysTextbox.on('change', _.bind(this.setupKeys, this));
+
+            // Pattern length
+            this.$maxPatternLength.on('change', _.bind(this.setupPatternLength, this));
+          },
+          setupCheckboxItems: function(item, trigger) {
+            var checked = item.node.prop('checked');
+            this.data[item.name] = checked;
+            if (trigger || trigger === undefined) {
+              this.trigger('change');
+            }
+          },
+          setupRangeItems: function(item, trigger) {
+            var value = item.node.val();
+            this.data[item.name] = parseFloat(value);
+            if (trigger || trigger === undefined) {
+              this.trigger('change');
+            }
+          },
+          setupIdentifier: function(trigger) {
+            this.data.id = this.$identifierTextbox.val();
+            if (trigger) {
+              this.trigger('change');
+            }
+          },
+          setupKeys: function(trigger) {
+            var text = this.$keysTextbox.val();
+            var keys = text.split(',');
+            keys = _.each(keys, function(key) {
+              return key.trim();
+            });
+            this.data.keys = keys;
+            if (trigger) {
+              this.trigger('change');
+            }
+          },
+          setupPatternLength: function(trigger) {
+            var value = this.$maxPatternLength.val();
+            this.data['maxPatternLength'] = parseInt(value);
+            if (trigger || trigger === undefined) {
+              this.trigger('change');
+            }
+          }
+        }
+      });
+      Fiber.mixin(App.Options, Mixins.Event);
+
+      App.Main = new (Fiber.extend(function() {
+        return {
+          init: function() {
+            this.setupNodes();
+            this.bindEvents();
+            this.setupItems();
+          },
+          setupNodes: function() {
+            this.$itemsTextArea = $('#itemsTextArea');
+            this.$searchTextbox = $('#searchTextbox');
+            this.$resultTextArea = $('#resultTextArea');
+            this.$jsTextArea = $('#jsTextArea');
+            this.$searchTimeLabel = $('#searchTimeLabel');
+          },
+          bindEvents: function() {
+            this.options = new App.Options();
+            this.options.on('change', _.bind(this.setupFuse, this));
+            this.$itemsTextArea.on('change', _.bind(this.setupItems, this));
+
+            this.$searchTextbox.on('keyup', _.debounce(_.bind(function() {
+              this.search(this.$searchTextbox.val());
+            }, this), 0));
+          },
+          setupItems: function() {
+            var list = this.$itemsTextArea.val();
+            this.list = eval(list);
+            this.setupFuse();
+          },
+          setupFuse: function() {
+            this.fuse = new Fuse(this.list, this.options.data);
+            console.log(this.options.data);
+            this.search(this.$searchTextbox.val());
+          },
+          search: function(pattern) {
+            if (pattern.length > this.options.data.maxPatternLength) {
+              this.$resultTextArea.html("Pattern length is too long");
+              return;
+            }
+            this.pattern = pattern;
+            var start = new Date().getTime();
+            var result = this.fuse.search(pattern);
+            var end = new Date().getTime();
+            this.$searchTimeLabel.text((end - start) + ' ms');
+            // var test = JSON.stringify(result, null, '  ');
+            // this.$resultTextArea.html(JSON.stringify(result, null, '  '));
+
+            // trying to build a string of html manually
+            // var html_string = '<ul>';
+            result.map(function(m, index) {
+                console.log(m.item.tags);
+            })
+            this.$resultTextArea.html(JSON.stringify(result, null, '  '));
+            this.updateJS();
+          },
+          updateJS: function() {
+            var arr = [];
+            arr.push('var options = {');
+            if (this.options.data.id) {
+              arr.push('  id: "' + this.options.data.id + '",');
+            }
+            arr.push('  caseSensitive: ' + this.options.data.caseSensitive + ',');
+            arr.push('  includeScore: ' + this.options.data.includeScore + ',');
+            arr.push('  shouldSort: ' + this.options.data.shouldSort + ',');
+            arr.push('  threshold: ' + this.options.data.threshold + ',');
+            arr.push('  location: ' + this.options.data.location + ',');
+            arr.push('  distance: ' + this.options.data.distance + ',');
+            arr.push('  maxPatternLength: ' + this.options.data.maxPatternLength + ',');
+            var keys = _.map(this.options.data.keys, function(item) {
+              return '"' + item + '"'
+            }).join(',');
+            arr.push('  keys: [' + keys + ']');
+            arr.push('};');
+            arr.push('var fuse = new Fuse(list, options); // "list" is the item array');
+            arr.push('var result = fuse.search("' + this.pattern + '");');
+            arr = arr.join('\n');
+            this.$jsTextArea.html(arr);
+          }
+        }
+      }))();
+
+    });
+
+  </script>
+
+  <section id="items">
+    <h2>Items</h2>
+
+    <textarea rows="20" cols="100" id="itemsTextArea">
+[
+  {
+    dictation: "foreign body disclaimer",
+    info: {
+      bullet_1: "No unexpected foreign body in a shape of a known surgical instrument is seen. Please note that a small surgical instrument or prosthesis may be obscured by implanted metallic instrumentation and would not be visible without an orthogonal lateral view; in addition, instrumentation utilized during the procedure may not be recognized, so confirmation by an agent  present at and familiar with the operative procedure and instruments used should be made.",
+      bullet_2: "FB reads are directed to the county ED 6-11pm, which should include a PHONE call to the OR, and a NOTE in synapse with attending documentation."
+    }
+  },
+  {
+    dictation: "msk rib fx",
+    info: {
+      bullet_1: "Bilateral rib fractures, worse on the left than the right, with minimal hematopneumothorax on the left."
+    }
+  },
+  {
+    dictation: "gu kidney renal injury aast laceration",
+    info: {
+      bullet_1: "AAST grade 1 or 2 left renal injury (subcapsular or perinephric hematoma).",
+      bullet_2: "There is a 2.4 cm deep laceration in the superior pole of the left kidney with a large subcapsular hematoma causing compression deformity of the renal cortex. The left kidney also demonstrates a delayed nephrogram concerning for Paige kidney physiology. On delayed phase imaging, there is an increasing hyperdensity in the anterior left kidney which may represent a focus of venous oozing versus early pooling of excreted contrast in the collecting system."
+    }
+  },
+  {
+    dictation: "gu adrenal lesion fat",
+    info: {
+      bullet_1: "2.3 cm left adrenal lesion with a component of macroscopic fat.  This could represent a myelolipoma with predominant hematopoietic cells; however, in setting of history of cancer, a collision tumor is also a possiblity. Recommend correlation with prior imaging to assess stability. MRI could be used to further evaluate if comparisons are not available."
+    }
+  },
+  {
+    dictation: "gu kidney pyelo",
+    info: {
+      bullet_1: "The right kidney has a Striated enhancement pattern which may represent pyelonephritis; correlate with urinalysis."
+    }
+  },
+  {
+    dictation: "gu renal cortical scarring",
+    info: {
+      bullet_1: "There is bilateral renal cortical scarring."
+    }
+  },
+  {
+    dictation: "gu perinephric stranding",
+    info: {
+      bullet_1: "There is bilateral non-specific perinephric fat stranding."
+    }
+  },
+  {
+    dictation: "gu prostate enlarged",
+    info: {
+      bullet_1: "The prostate indents the inferior aspect of the urinary bladder."
+    }
+  },
+  {
+    dictation: "gu bladder thickening collapsed",
+    info: {
+      bullet_1: "There is mild urinary bladder wall thickening; correlate for chronic/acute cystitis.",
+      bullet_2: "The urinary bladder is collapsed which limits it's evaluation, however, no focal enhancing mass is identified."
+    }
+  },
+  {
+    dictation: "gu bladder injury perivesicular hematoma",
+    info: {
+      bullet_1: "Small focal extraperitoneal right paravesicular hematoma with a preserved fat plane between the urinary bladder. Urinary bladder injury is considered unlikely."
+    }
+  },
+  {
+    dictation: "gu uterus hysterectomy",
+    info: {
+      bullet_1: "The uterus is surgically absent."
+    }
+  },
+  {
+    dictation: "gu renal hydronephrosis delayed nephrogram",
+    info: {
+      bullet_1: "The left renal nephrogram is delayed. Contrast is present within the left upper and lobe pole calices; however, the left ureter is predominately unopacified and diminutive in caliber.",
+      bullet_2: "Moderate left hydroureteronephrosis to the level of a 5 mm stone located in the distal left ureter proximal to the ureterovesicular junction is present. The edematous left kidney demonstrates a delayed nephrogram.",
+      bullet_3: "There is bilateral hydronephrosis and proximal ureteronephrosis."
+    }
+  },
+  {
+    dictation: "atrophic kidney cystic renal",
+    info: {
+      bullet_1: "Atrophic bilateral kidneys with multiple cystic structures consistent with history of end-stage renal disease."
+    }
+  },
+  {
+    dictation: "calcified ectatic aorta aneurysmal",
+    info: {
+      bullet_1: "Severely calcified ectatic aorta and major branches with aneurysmal dilatation of the bilateral common iliac arteries measuring up to 1.6 cm."
+    }
+  },
+  {
+    dictation: "gi acute diverticulitis colonoscopy perforated",
+    info: {
+      bullet_1: "Pancolonic diverticulosis with findings consistent with acute diverticulitis involving the ascending colon. Recommend post treatment colonoscopy to exclude underlying malignancy.",
+      bullet_2: "There is pericolonic fat stranding within the sigmoid colon with area of discontinuity of the colonic wall with extraluminal contents compatible with perforation.  IMP: Perforated sigmoid diverticulitis. Recommend follow-up CT or colonoscopy after treatment to ensure that underlying malignancy is not present."
+    }
+  },
+  {
+    dictation: "chest pulm lung nodule",
+    info: {
+      bullet_1: "Two 4 mm pulmonary nodules within the right middle lobe and subpleural nodule within the left upper lobe. These likely represent an inflammatory/infectious process; however, malignancy is not excluded. Recommend follow-up CT of the chest in the 6 months to evaluate stability.",
+      bullet_2: "There is 5.5 right lower lobe lung nodule, which is essentially unchanged in size allowing for differences in measuring technique (image 15).",
+      bullet_3: "There is a 6mm left lower lobe pulmonary nodule; consider follow up CT in 12 months."
+    }
+  },
+  {
+    dictation: "gi sbo",
+    info: {
+      bullet_1: "There are dilated segments of small bowel with air-fluid levels and a discrete transition point in the distal jejunum (series 2, image 52) with decompressed bowel distally. No free intra-peritoneal air, pneumatosis, portal venous gas, or free fluid is seen.",
+      bullet_2: "There is a ventral hernia containing fat and a segment of ilium which serves as a transition point with proximal small bowel dilatation measuring up to 5 cm. There is marked submucosal edema, however, mucosal enhancement is maintained throughout the small bowel."
+    }
+  },
+  {
+    dictation: "gi mesenteric density",
+    info: {
+      bullet_1: "There are increased density of the mesenteric fat which is concerning for sclerosing mesenteritis, however, lymphoma and peritoneal carcinomatosis cannot be excluded."
+    }
+  },
+  {
+    dictation: "gi inguinal hernia",
+    info: {
+      bullet_1: "There is a fat and bowel containing inguinal hernia without evidence of obstruction.",
+      bullet_2: "There are bilateral fat-containing inguinal hernias, the right hernia with a small amount of fat stranding."
+    }
+  },
+  {
+    dictation: "gi diverticulosis",
+    info: {
+      bullet_1: "IMP: Diverticulosis without evidence of diverticulitis.",
+      bullet_2: "There are scattered colonic diverticuli."
+    }
+  },
+  {
+    dictation: "gi wall thickening edema colitis",
+    info: {
+      bullet_1: "Circumferential intramural edema predominately involving the left colon and rectum compatible with colitis compatible with known diarrheal illness.",
+      bullet_2: "A moderate amount of fluid is seen throughout the small bowel and colon to the rectum, suggesting a diarrheal illness.",
+      bullet_3: "There is diffuse wall thickening of predominately the cecum and ascending colon and to a smaller extent the transverse and descending colon consistent with colitis; an infectious or inflammatory etiology is favored over an ischemic etiology."
+    }
+  },
+  {
+    dictation: "lung cystic bronchiectasis",
+    info: {
+      bullet_1: "Irregular cystic spaces versus bronchiectasis is noted in the right lower lobe."
+    }
+  },
+  {
+    dictation: "appendicitis perforated diverticulitis",
+    info: {
+      bullet_1: "There are several irregular, thick- walled collections of fluid, some containing gas, in the right and left pelvis, consistent with abscesses, likely due to acute appendicitis with perforation - although the possibility of sigmoid diverticulitis with perforation is not excluded.",
+      bullet_2: "There is a dilated appendix with discontinuous nonenhancing wall distally surrounded by inflammatory change and associated with a small amount of free fluid."
+    }
+  },
+  {
+    dictation: "liver fatty",
+    info: {
+      bullet_1: "The liver is normal in morphology and diffusely hypoattenuating in keeping with fatty infiltration."
+    }
+  },
+  {
+    dictation: "gi proctocolectomy ileostomy",
+    info: {
+      bullet_1: "The patient is status post proctocolectomy with end ileostomy."
+    }
+  },
+  {
+    dictation: "gi mesentery fluid collection",
+    info: {
+      bullet_1: "There is an elongated incompletely formed and evolving fluid collection extending from the inferior aspect of the right hepatic lobe inferiorly and crossing the midline which appears to be predominately within the small bowel mesentery."
+    }
+  },
+  {
+    dictation: "renal perc nephro tubes",
+    info: {
+      bullet_1: "There are bilateral percutaneous nephrostomy tubes with coiled tip apparently in the renal pelvises bilaterally."
+    }
+  },
+  {
+    dictation: "uterine lesion",
+    info: {
+      bullet_1: "Subcentimeter hyperdense lesion in the uterine fundus may represent fibroid.",
+      bullet_2: "There are large uterine calcifications likely representing leiomyomas (fibroids)."
+    }
+  },
+  {
+    dictation: "renal solid mass",
+    info: {
+      bullet_1: "A 7.0 x 5.5 x 5.5 cm heterogeneous mass is seen arising from the upper pole of the left kidney. A thin rim of normal renal parenchyma is seen surrounding portions of the tumor. There are low-density areas in the interior parts of the lesion which may represent cystic portions versus necrotic changes."
+    }
+  },
+  {
+    dictation: "gi hepatic liver mass small lesions",
+    info: {
+      bullet_1: "Hypervascular lesion within the left hepatic lobe may represent a hemangioma.",
+      bullet_2: "A low attenuating lesion within the right hepatic lobe is indeterminate. An MRI could be used to further evaluate this lesion.",
+      bullet_3: "2.4 cm oval hepatic lesion with dense peripheral enhancement, suggestive of cavernous hemangioma.",
+      bullet_4: "There are multiple low density lesions in the liver which are too small to characterize."
+    }
+  },
+  {
+    dictation: "adnexa follicle cyst tubular hydrosalpinx",
+    info: {
+      bullet_1: "Small physiologic follicles/cysts are noted within bilateral adnexa.",
+      bullet_2: "There has been interval increase in the size of the bilateral tubular cystic structures within the adnexal regions consistent with worsening hydrosalpinx."
+    }
+  },
+  {
+    dictation: "gu kidney renal cyst",
+    info: {
+      bullet_1: "Right kidney contains a 2.4 x 2.6 cm cystic lesion with some soft tissue nodularity.",
+      bullet_2: "Bilateral renal cysts and low density lesions are present. The largest of which is a 7 cm cyst within the upper pole of the right kidney.",
+      bullet_3: "There is a sub-centimeter low density lesion in the right kidney which is too small to characterize.",
+      bullet_4: "Right kidney contains a 2.4 x 2.6 cm low density lesion with Hounsfield units in the fluid range likely to represent a cyst within the limitations of this non-contrast enhanced study."
+    }
+  },
+  {
+    dictation: "hepatic cyst",
+    info: {
+      bullet_1: "A 5 mm low density lesion is identified within the superior right hepatic lobe, likely cyst."
+    }
+  },
+  {
+    dictation: "gastric mass",
+    info: {
+      bullet_1: "There is redemonstration of circumferential irregular mural thickening of the distal stomach with areas of central necrosis, measuring approximate 10.4 x 5.5 cm. Associated with this is bulky upper abdominal confluent lymphadenopathy.",
+      bullet_2: "IMP: Gastric mural thickening and abdominal lymphadenopathy as above most consistent with metastatic gastric carcinoma."
+    }
+  },
+  {
+    dictation: "renal nonrotation",
+    info: {
+      bullet_1: "There is nonrotation of the right kidney with mild hydronephrosis."
+    }
+  },
+  {
+    tags: "NEURO START",
+    info: {
+      bullet_1: "NEURO START"
+    }
+  },
+  {
+    dictation: "neuro ventriculomeagly nph",
+    info: {
+      bullet_1: "There is ventriculomeagly out of proportion to cerebral sulci which may represent normal pressure hydrocephalus."
+    }
+  },
+  {
+    dictation: "neuro asvd",
+    info: {
+      bullet_1: "Atherosclerotic vascular calcifications are identified within the bilateral internal carotid arteries.",
+      bullet_2: "Atherosclerotic vascular calcifications of the vertebral and internal carotid arteries are noted."
+    }
+  },
+  {
+    dictation: "neuro streak artifact",
+    info: {
+      bullet_1: "Streak artifact limits evaluation of fine bony detail below the C6 level."
+    }
+  },
+  {
+    dictation: "neuro lens missing",
+    info: {
+      bullet_1: "There is thinning of the lens or prior lens replacement."
+    }
+  },
+  {
+    dictation: "neuro periventricular white matter",
+    info: {
+      bullet_1: "There are periventricular white matter hypodensities which are likely secondary to chronic microvascular ischemic changes.",
+      bullet_2: "There are periventricular white matter hypodensities which are stable compared to the prior CT scan."
+    }
+  },
+  {
+    dictation: "neuro dedicated CT max",
+    info: {
+      bullet_1: "A dedicated CT maxillofacial scan is recommended for further evaluation."
+    }
+  },
+  {
+    dictation: "neuro facet widening",
+    info: {
+      bullet_1: "There is minimal widening of the left C3-C4 facet joint which may be positional."
+    }
+  },
+  {
+    dictation: "neuro lamina papyracea fx",
+    info: {
+      bullet_1: "There is an old right lamina papyracea fracture."
+    }
+  },
+  {
+    dictation: "neuro nasal bone fx",
+    info: {
+      bullet_1: "There is an old nasal bone fracture deformity.",
+      bullet_2: "There is a comminuted nasal bone fractures which are mildly displaced."
+    }
+  },
+  {
+    dictation: "neuro nasal septum fx deviated",
+    info: {
+      bullet_1: "There is a fracture of the bony nasal septum; no hemorrhage is seen in the nasal septum."
+    }
+  },
+  {
+    dictation: "neuro maxillary sinus wall fx",
+    info: {
+      bullet_1: "There is a fracture of the posterior wall of the right maxillary sinus. Air-fluid levels are seen in the right maxillary sinus likely representing hemorrhage."
+    }
+  },
+  {
+    dictation: "neuro multiple facial fx",
+    info: {
+      bullet_1: "There are multiple facial fractures including ... which are age indeterminate; correlate with trauma mechanism and physical exam."
+    }
+  },
+  {
+    dictation: "neuro mandible fx",
+    info: {
+      bullet_1: "There is a comminuted fracture of the coronoid process of the right mandible."
+    }
+  },
+  {
+    dictation: "neuro zygoma fx",
+    info: {
+      bullet_1: "There is a comminuted fracture of the right zygoma."
+    }
+  },
+  {
+    dictation: "neuro head subdural fluid collection hematoma hygroma",
+    info: {
+      bullet_1: "There is a subdural fluid collection which may represent chronic subdural hematoma vs subdural hygroma."
+    }
+  },
+  {
+    dictation: "decreased bone density",
+    info: {
+      bullet_1: "The bone density is diffusely decreased."
+    }
+  },
+  {
+    dictation: "neuro neck gas line placement",
+    info: {
+      bullet_1: "There is gas in the right lateral neck which may be related to line placement, correlate clinically."
+    }
+  },
+  {
+    dictation: "neuro globe increased density",
+    info: {
+      bullet_1: "There is increased density of the right globe which may represent silicone from a prior procedure, correlate with ocular exam."
+    }
+  },
+  {
+    dictation: "neuro anterolithesis",
+    info: {
+      bullet_1: "There is mild anterolithesis of C5 on C6 which is likely degenerative."
+    }
+  },
+  {
+    dictation: "neuro transitional vertebral anatomy",
+    info: {
+      bullet_1: "Transitional vertebral anatomy is present with 6 non-rib bearing vertebrae."
+    }
+  },
+  {
+    dictation: "neuro head post op blood pneumocephalus",
+    info: {
+      bullet_1: "There are post-operative changes with minimal residual fluid collection and subdural blood and pneumocephalus in the region of the surgical bed."
+    }
+  },
+  {
+    dictation: "neuro head metastases multifocal",
+    info: {
+      bullet_1: "There are multiple areas of mass effect and edema in the parenchyma compatible with multifocal metastases, the largest lesion in the inferior frontal lobe."
+    }
+  },
+  {
+    dictation: "neuro sphenoid fx",
+    info: {
+      bullet_1: "There is fracture of the body of the sphenoid extending to the carotid canal."
+    }
+  },
+  {
+    dictation: "neuro intraparenchymal hemorrhage",
+    info: {
+      bullet_1: "There is a large left frontal lobe intraparenchymal hemorrhage with a fluid-fluid level representing ongoing hemorrhage."
+    }
+  },
+  {
+    dictation: "neuro gray white edema",
+    info: {
+      bullet_1: "The gray-white matter differentiation is less conspicous which may represent cerebral edema."
+    }
+  },
+  {
+    dictation: "neuro parenchymal calcifications",
+    info: {
+      bullet_1: "There are scattered parenchymal punctate calcifications which likely represents prior infection."
+    }
+  },
+  {
+    dictation: "neuro scalp sts edema",
+    info: {
+      bullet_1: "There is soft tissue swelling along the right parietal scalp.",
+      bullet_2: "There is soft tissue swelling in the region of the posterior vertex."
+    }
+  },
+  {
+    dictation: "neuro calcification basal ganglia",
+    info: {
+      bullet_1: "There is calcification of the bilateral basal ganglia, likely physiologic."
+    }
+  },
+  {
+    dictation: "neuro cavum septum pellucidum",
+    info: {
+      bullet_1: "Incidentally noted is a cavum septum pellucidum."
+    }
+  },
+  {
+    dictation: "neuro aneurysm clip mca",
+    info: {
+      bullet_1: "There is an aneurysm clip in the expected region of the right middle cerebral artery."
+    }
+  },
+  {
+    dictation: "neuro proptosis",
+    info: {
+      bullet_1: "There is bilateral proptosis; correlate with physical exam and thyroid function tests."
+    }
+  },
+  {
+    dictation: "neuro uncovertebral narrowing",
+    info: {
+      bullet_1: "Uncovertebral joint hypertrophy is present causing neuroforaminal narrowing."
+    }
+  },
+  {
+    dictation: "neuro ddd",
+    info: {
+      bullet_1: "Degenerative disc disease is present with disc space narrowing, osteophyte formation and endplate sclerosis most prominent at",
+      bullet_2: "There are multilevel degenerative changes of the spine most prominent at the C5-C6 and C6-C7 levels."
+    }
+  },
+  {
+    dictation: "neuro facet arthropathy",
+    info: {
+      bullet_1: "Facet arthropathy is present."
+    }
+  },
+  {
+    dictation: "neuro hypo frontal lobe",
+    info: {
+      bullet_1: "Hypodensity in the left frontal lobe likely represents an old lacunar infarct."
+    }
+  },
+  {
+    dictation: "neuro facial sts",
+    info: {
+      bullet_1: "There is periorbital and pre-maxillary soft tissue swelling."
+    }
+  },
+  {
+    dictation: "neuro spine beam artifact",
+    info: {
+      bullet_1: "Evaluation below the C5 level is limited secondary to beam-hardening artifact."
+    }
+  },
+  {
+    dictation: "ventral hernia",
+    info: {
+      bullet_1: "The most inferior hernia measures approximately 4.2 x 10.0 x 7.1 cm (AP x TR x CC) and contains the cecum. Mild fat stranding is seen, but normal bowel wall enhancement and absence of pneumatosis are noted. There is minimal fluid within the hernia sac."
+    }
+  },
+  {
+    dictation: "gi pancreas cystic mass",
+    info: {
+      bullet_1: "The pancreas contains a hypoattenuating 2.1 x 1.8 cm cystic mass which contains near-water density material.",
+      bullet_2: "IMP: Hypoattenuating cystic pancreatic lesion as described above.  Differential includes serous cystic neoplasm, intraductal papillary mucinous neoplasm (side branch) or less likely mucinous cystic neoplasm or pancreatic adenocarcinoma. Recommend MRI for further evaluation.",
+      bullet_3: "A 7.0 x 7.0 x 6.5 cm cystic structure containing homogeneous water attenuation is noted in the hepatorenal fossa with adjacent thickening of the duodenum compatible with inflammation from prior pancreatitis and pseudocyst formation.",
+      bullet_4: "There is a peri-pancreatic fluid collection which is loculated, peripherally enhancing and well organized measuring on the order of 12 x 12 x 15 cm consistent with a pancreatic pseudocyst, sterile vs. infected."
+    }
+  },
+  {
+    tags: "variant vascular anatomy",
+    info: {
+      bullet_1: "Incidentally noted is a circumaortic left renal vein."
+    }
+  },
+  {
+    tags: "GI START",
+    info: {
+      bullet_1: "GI START"
+    }
+  },
+  {
+    tags: "gi pancreatitis",
+    info: {
+      bullet_1: "There is peripancreatic inflammatory fluid and fluid in the pericolic gutters consistent with acute pancreatitis."
+    }
+  },
+  {
+    tags: "gi colon wall thickening",
+    info: {
+      bullet_1: "There is segmental wall thickening throughout the colon consistent with an inflammatory bowel disease flare."
+    }
+  },
+  {
+    tags: "gi gastric thickening",
+    info: {
+      bullet_1: "There is diffuse thickening of the gastric wall.",
+      bullet_2: "There is circumferential gastric wall thickening which may represent gastritis."
+    }
+  },
+  {
+    tags: "CHEST START",
+    info: {
+      bullet_1: "CHEST START"
+    }
+  },
+  {
+    tags: "chest wall trauma hematoma gas subcutaneous",
+    info: {
+      bullet_1: "There is an extra-pleural hematoma along the previously mentioned rib fractures.",
+      bullet_2: "There is a large amount of subcutaneous and peri-fascial gas along the left lateral chest wall."
+    }
+  },
+  {
+    tags: "chest opacites trauma contusion",
+    info: {
+      bullet_1: "There are nodular and ground-glass opacites which may represent lung contusion or aspiration in the setting of trauma.",
+      bullet_2: "Band-like opacity are seen in the anterior right lower lung, not previously seen and may represent atelectasis vs. infection.",
+      bullet_3: "Patchy opacites in the left lower lobe may represent atelectasis vs. pneumonia vs. aspiration."
+    }
+  },
+  {
+    tags: "chest sternal fx",
+    info: {
+      bullet_1: "There is a mid body sternal fracture with a retrosternal hematoma."
+    }
+  },
+  {
+    tags: "chest pneumothorax",
+    info: {
+      bullet_1: "There is suggestion of a tiny right anterior pneumothorax best seen on series 2, image 52.",
+      bullet_2: "There is a predominately anterior left pneumothorax with concave contouring of the right ventricle consistent with a tension pneumothorax."
+    }
+  },
+  {
+    tags: "chest hyperaeration COPD",
+    info: {
+      bullet_1: "There is hyperaeration of the lungs with flattening of the diaphragms; correlate for COPD."
+    }
+  },
+  {
+    tags: "chest trachea",
+    info: {
+      bullet_1: "The trachea is slightly deviated to the right."
+    }
+  },
+  {
+    tags: "chest aortic calcs",
+    info: {
+      bullet_1: "Calcifications of the descending thoracic aorta are present."
+    }
+  },
+  {
+    tags: "chest pericardial effusion",
+    info: {
+      bullet_1: "There is a trace pericardial effusion."
+    }
+  },
+  {
+    tags: "chest consolidation",
+    info: {
+      bullet_1: "Consolidation in the right lower lobe may represent a combination of infarction, atelectasis and infection."
+    }
+  },
+  {
+    tags: "chest cardiac pacer pacemaker",
+    info: {
+      bullet_1: "There is a cardiac pacer pad overlying the mediastinum."
+    }
+  },
+  {
+    tags: "chest ET tube enteric",
+    info: {
+      bullet_1: "An endotracheal tube is seen approximately 3.2 cm above the carina. An enteric tube is out of the field of view."
+    }
+  },
+  {
+    tags: "chest emphysema",
+    info: {
+      bullet_1: "Emphysema is seen at the right lung base."
+    }
+  },
+  {
+    tags: "chest cp angle",
+    info: {
+      bullet_1: "There is blunting of the left costophrenic angle likely representing a pleural effusion."
+    }
+  },
+  {
+    tags: "chest levoscoliosis",
+    info: {
+      bullet_1: "There is mild levoscoliosis of the thoracic spine."
+    }
+  },
+  {
+    tags: "chest subseg atelectasis",
+    info: {
+      bullet_1: "There is bibasilar subsegmental atelectasis."
+    }
+  },
+  {
+    tags: "chest cp silh enl",
+    info: {
+      bullet_1: "The cardiomediastinal silhouette is enlarged."
+    }
+  },
+  {
+    tags: "BODY START",
+    info: {
+      bullet_1: "BODY START"
+    }
+  },
+  {
+    tags: "body recanal paraumbilical cirrhosis collateral anasarca",
+    info: {
+      bullet_1: "There is recanalization of the paraumbilical vein.",
+      bullet_2: "There are para-esophageal, gastrohepatic and peri-splenic collaterals.",
+      bullet_3: "There is extensive upper abdominal and abdominal wall portal venous collaterals including esophageal varices.",
+      bullet_4: "There are diffuse reticulations in the subcutaneous soft tissues consistent with anasarca."
+    }
+  },
+  {
+    tags: "body cirrhosis",
+    info: {
+      bullet_1: "IMP: cirrhosis with features of portal hypertension including moderate volume ascites, splenomegaly, portal venous collaterals, colopathy and anasarca."
+    }
+  },
+  {
+    tags: "body cirrhosis complications sbp",
+    info: {
+      bullet_1: "There is portal hypertensive gastropathy, colopathy and enteropathy.",
+      bullet_2: "There is mild peritoneal thickening which may represent spontaneous bacterial peritonitis."
+    }
+  },
+  {
+    tags: "body free fluid pelvis",
+    info: {
+      bullet_1: "There is a small amount of free fluid in the pelvis which is non-specific."
+    }
+  },
+  {
+    tags: "MSK START",
+    info: {
+      bullet_1: "MSK START"
+    }
+  },
+  {
+    tags: "msk template",
+    info: {
+      bullet_1: "msk template"
+    }
+  },
+  {
+    tags: "msk ossific density talus",
+    info: {
+      bullet_1: "An small ossific density adjacent to the left talus likely represents an old injury."
+    }
+  },
+  {
+    tags: "msk patella alta instability",
+    info: {
+      bullet_1: "The Insall-Salvati ratio is approximately 1.4, indicative of patella alta.",
+      bullet_2: "There is mild patella alta without evidence of patellar tendon injury.",
+      bullet_3: "The tibial tuberosity trochlear groove (TT-TG) distance is approximately 18 mm which may represent patellar instability."
+    }
+  },
+  {
+    tags: "msk sonc subchondral insuff fx",
+    info: {
+      bullet_1: "There is a subchondral insufficiency fracture of the distal femur."
+    }
+  },
+  {
+    tags: "msk knee chondrosis",
+    info: {
+      bullet_1: "There is intermediate to high grade chondrosis of the medial and lateral compartments with large marginal osteophytes."
+    }
+  },
+  {
+    tags: "msk medial meniscus tear",
+    info: {
+      bullet_1: "There is a complex tear of the medial meniscus with degenerative maceration."
+    }
+  },
+  {
+    tags: "msk mucoid degen pcl",
+    info: {
+      bullet_1: "Mucoid degeneration of the posterior cruciate ligament is present."
+    }
+  },
+  {
+    tags: "msk amputation",
+    info: {
+      bullet_1: "There has been amputation of the left forefoot."
+    }
+  },
+  {
+    tags: "msk synovial densities",
+    info: {
+      bullet_1: "There are multiple intra-articular ossific densities within the synovial joint likely representing synovial osteochondromatosis."
+    }
+  },
+  {
+    tags: "msk foreign bodies",
+    info: {
+      bullet_1: "Multiple anti-biotic loaded beads are noted in this region."
+    }
+  },
+  {
+    tags: "msk hip femur djd",
+    info: {
+      bullet_1: "There is mild osteophyte formation of the bilateral hip joints.",
+      bullet_2: "There is osteophyte formation of the left femoral head and neck junction."
+    }
+  },
+  {
+    tags: "msk pelvic lytic lesion",
+    info: {
+      bullet_1: "There is a large lytic lesion involving a majority of the right iliac wing with soft tissue component measuring 9.1 x 4.5 cm."
+    }
+  },
+  {
+    tags: "msk rice bodies",
+    info: {
+      bullet_1: "Associated with rheumatoid arthritis"
+    }
+  },
+  {
+    tags: "msk ulna fx",
+    info: {
+      bullet_1: "There is an acute fracture of the distal ulna with surrounding soft tissue swelling.",
+      bullet_2: "There is an acute, impacted fracture of the distal ulna with intra-articular extension with surrounding soft tissue swelling."
+    }
+  },
+  {
+    tags: "msk scapular fx",
+    info: {
+      bullet_1: "There is a comminuted fracture of the left scapular body with extension to the inferior margin."
+    }
+  },
+  {
+    tags: "msk ac joint osteoarthrosis",
+    info: {
+      bullet_1: "Osteoarthrosis of the left acromioclavicular joint is present with joint space narrowing and subchondral sclerosis."
+    }
+  },
+  {
+    tags: "msk ossicles accessory",
+    info: {
+      bullet_1: "Incidentally noted is an os peroneum.",
+      bullet_2: "There is a type 2 accessory navicular on the right."
+    }
+  },
+  {
+    tags: "msk pars interarticularis",
+    info: {
+      bullet_1: "There are bilateral pars interarticularis defects with no listhesis."
+    }
+  },
+  {
+    tags: "msk calcific tendinosis",
+    info: {
+      bullet_1: "There is a calcific density of the lateral humerus which may represent rotator cuff calcific tendinosis."
+    }
+  },
+  {
+    tags: "msk femur hardware nonunion union",
+    info: {
+      bullet_1: "Intra-medullary rod and screw fixation hardware is noted in the left femur."
+    }
+  },
+  {
+    tags: "msk fx hardware complications",
+    info: {
+      bullet_1: "There is a chronic fracture deformity involving the proximal and distal tibia with areas of lucency which may represent persistent non-union.",
+      bullet_2: "Medial screwheads appear to be protruding laterally into the subcutaneous soft tissue."
+    }
+  },
+  {
+    tags: "msk mtp joint",
+    info: {
+      bullet_1: "The 5th metatarsophalangeal joint is subluxed with dorsal soft tissue swelling."
+    }
+  },
+  {
+    tags: "msk mcp joint",
+    info: {
+      bullet_1: "There is joint space narrowing of the 1st metacarpophalangeal joint with peri-articular erosions."
+    }
+  },
+  {
+    tags: "msk compression fx",
+    info: {
+      bullet_1: "There is an age indeterminate compression deformity of the L5 vertebral body; correlate with point tenderness for acuity."
+    }
+  },
+  {
+    tags: "msk pelvis calcific ossific density",
+    info: {
+      bullet_1: "A round calcific density projects over the pelvis which likely represents a phlebolith."
+    }
+  },
+  {
+    tags: "msk digit sts",
+    info: {
+      bullet_1: "There is soft tissue swelling around the 1st digit of the left foot without radiographic evidence of osteomyelitis."
+    }
+  },
+  {
+    tags: "msk hallux valgus",
+    info: {
+      bullet_1: "There are severe hallux valgus deformities bilaterally."
+    }
+  },
+  {
+    tags: "msk radiux fx",
+    info: {
+      bullet_1: "There is a comminuted distal radius fracture with intra-articular extension and volar angulation."
+    }
+  },
+  {
+    tags: "msk metacarpal fx",
+    info: {
+      bullet_1: "There is a displaced, communited fracture through the 5th metacarpal neck with radial and volar angulation."
+    }
+  },
+  {
+    tags: "msk phalanx acroosteolysis",
+    info: {
+      bullet_1: "Acroosteolysis of the 1st - 4th digits is present; correlate with the patient's history."
+    }
+  },
+  {
+    tags: "msk lateral malleolus sts",
+    info: {
+      bullet_1: "There is soft tissue swelling of the lateral malleous."
+    }
+  },
+  {
+    tags: "msk lateral malleolus avulsion",
+    info: {
+      bullet_1: "An age indeterminate avulsive injury of the left lateral malleous is present."
+    }
+  },
+  {
+    tags: "msk clavicle osteolysis",
+    info: {
+      bullet_1: "There is questionable distal osteolysis in the right clavicle."
+    }
+  },
+  {
+    tags: "msk ac joint separation",
+    info: {
+      bullet_1: "The corococlavicular interval is widened at 15mm and the acromioclavicular joint is widened which may represent a grade III AC joint separation which is age indeterminate."
+    }
+  },
+  {
+    tags: "msk old clavicle fx",
+    info: {
+      bullet_1: "There is an old left clavicle fracture."
+    }
+  },
+  {
+    tags: "msk limited",
+    info: {
+      bullet_1: "Only a lateral radiograph was requested by the ordering physician; the exam is severely limited for underlying bone pathology."
+    }
+  },
+  {
+    tags: "msk heterotopic calcification",
+    info: {
+      bullet_1: "Heterotopic calcifications are seen inferior to the calcaneus."
+    }
+  },
+  {
+    tags: "msk metacarpal fx",
+    info: {
+      bullet_1: "There is a fracture of the 4th metacarpal of the left hand with one full shaft width dorsal displacement and adjacent soft tissue swelling."
+    }
+  },
+  {
+    tags: "MODALITY SPECIFIC START",
+    info: {
+      bullet_1: "MODALITY SPECIFIC START"
+    }
+  },
+  {
+    tags: "kub ascites",
+    info: {
+      bullet_1: "There is medial displacement of bowel and solid viscera and loss of the properitoneal fat stripe; correlate for ascites."
+    }
+  },
+  {
+    tags: "kub ostomy",
+    info: {
+      bullet_1: "A right lower quadrant ostomy is present."
+    }
+  },
+  {
+    tags: "kub dilated",
+    info: {
+      bullet_1: "There are dilated, gas-filled segments of small bowel which may represent early/partial small bowel obstruction or ileus."
+    }
+  },
+  {
+    tags: "END",
+    info: {
+      bullet_1: "This is the end"
+    }
+  }
+]
+    </textarea>
+
+  </section>
+
+
+</body>
+
+</html>
+
