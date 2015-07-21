@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>reveal.js - The HTML Presentation Framework</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal" >
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides" style="font-size:0.8em">
+				<section>
+          <h2>MR Body Sequences</h2>
+          <h4>July 23rd, 2015</h4>
+					<p>
+						<small><a href="">Mark Tran</a> </small>
+					</p>
+				</section>
+
+				<section style="text-align:left">
+					<h2>Outline</h2>
+          <ul class="fragment">
+            <li class="fragment">Basic MR Physics</li>
+            <li class="fragment">Spin Echo Sequences
+            <ul>
+              <li class="fragment">FSE</li>
+              <li class="fragment">SSFSE</li>
+              <li class="fragment">MRCP</li>
+            </ul></li>
+            <li class="fragment">Gradient Echo Sequences
+            <ul>
+              <li class="fragment">Plain Gradient Echo/SPGR</li>
+              <li class="fragment">In and Out of Phase</li>
+              <li class="fragment">LAVA</li>
+              <li class="fragment">FIESTA</li>
+            </ul></li>
+            <li class="fragment">DWI</li>
+          </ul>
+				</section>
+
+				<!-- Example of nested vertical slides -->
+				<section style="text-align:left">
+					<section>
+            <h3 style="text-align:center">MR Physics</h3>
+            <hr>
+            <p>Protons (hydrogen atoms) have a property called nuclear spin. They behave like tiny rotating magnets.</p>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/spin.gif">
+					</section>
+          <section>
+            <h3 style="text-align:center">Applied Magnetic Field</h3>
+            <hr>
+            <ul>
+              <li>Within a large external magnetic field (called B0), nuclear spins align with the external field. </li>
+              <li>Some of the spins align with the field (parallel) and some align against the field (anti-parallel).</li>
+            </ul>
+            <img style="height:280px; width:auto;" src="img/align.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Precession</h3>
+            <hr>
+            <ul>
+              <li>Spins wobble (or precess) about the axis of the BO field, like a dreidle.</li>
+              <li>This is called precession.</li>
+              <li>The resonance frequency, called Larmor frequency (ω0) or precessional frequency, is proportional to the main magnetic field strength:</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/larmor.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Larmor Frequency</h3>
+            <hr>
+            <p>Remember that the RF pulse must match the Larmor frequency exactly for the proton to be able to "excited" by the pulse.</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">Gradients</h3>
+            <hr>
+            <ul>
+              <li>The first step of spatial encoding consists of selecting the slice plane &rarr; Slice Selection Gradient (GSS).</li>
+              <li>A similiar technique applies phase and frequency encoding gradients in the other 2 orthogonal dimensions.</li>
+              <li>This complex sequence of RF pulses and gradients is precisely timed to excite protons from a specific volume of protons.</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/gradient.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">K Space</h3>
+            <hr>
+            <ul>
+              <li>Contains raw data from the scan, after an inverse Fourier transform is performed on this data, images are produced.</li>
+              <li>Data at the center of k-space contains information about contrast.</li>
+            </ul>
+            <img style="height:450px; width:auto;" src="img/kspace.png">
+          </section>
+				</section>
+
+        <section style="text-align:left">
+          <section>
+            <h3 style="text-align:center">T1 Contrast</h3>
+            <ul>
+              <li>TR &rarr; time from the application of an excitation pulse to the application of the next pulse.</li>
+              <li>It determines how much longitudinal magnetization recovers between each pulse; reducing TR will weight the image
+              in T1 as the differences between the longitudinal relaxation will be maximized. </p></li>
+            </ul>
+            <img src="img/contrast.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">T2 Contrast</h3>
+            <ul>
+              <li>TE &rarr; time between the application of the excitation pulse and peak of the echo signal </li>
+              <li>Transverse magnetization decreases according to T2 (field heterogeneities [which give T2*] are nulled by the 180° pulse).</li>
+              <li>When the TE is long, T2 differences are highlighted.</li>
+            </ul>
+            <img src="img/contrast.png">
+          </section>
+        </section>
+
+				<section style="text-align:left">
+          <section>
+            <h3>Sequence Classification</h3>
+            <hr>
+            <p>Spin Echo (180° rephasing RF pulse)</p>
+            <ul>
+              <li>FSE</li>
+              <li>SSFSE</li>
+              <li>MRCP</li>
+            </ul>
+            <p>Gradient Echo</p>
+            <ul>
+              <li>Plain Gradient Echo/SPGR</li>
+              <li>In and out of phase</li>
+              <li>LAVA</li>
+              <li>FIESTA</li>
+            </ul>
+            <p>DWI</p>
+          </section>
+          <section>
+            <p>Numerous variations have been developed within each of these families, mainly to increase acquisition speed:</p>
+            <img src="img/mr_acronyms_box.png">
+          </section>
+				</section>
+
+        <section style="text-align:left">
+          <h3 style="text-align:center">Practical Take Home Points</h3>
+          <hr>
+          <ul>
+            <li>Ask for subtraction sequences</li>
+            <li>Look at all sequences, including DWI</li>
+            <li>We don't have Eovist, get 1 hr delays</li>
+          </ul>
+        </section>
+
+				<section style="text-align:left">
+          <section>
+            <h3 style="text-align:center">Spin Echo</h3>
+            <hr>
+            <ul>
+              <li>The spin echo sequence is made up of a series of events: 90° pulse, then 180° refocusing pulse, signal reading at TE.</li>
+              <li>This series is repeated at each time interval TR (repetition time).</li>
+              <li>With each repetition, a k-space line is filled.</li>
+            </ul>
+            <img  style="display:block; margin-left:auto; margin-right:auto" src="img/spin_echo.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Major Disadvantage</h3>
+            <p>T2 weighted spin echo sequences require long TR resulting in <strong class="fragment highlight-red">long acquisition times</strong>.</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">Fast Spin Echo</h3>
+            <hr>
+            <img src="img/mr_acronyms_fse.png">
+          </section>
+          <section style="text-align:left">
+            <h3 style="text-align:center">Fast Spin Echo</h3>
+            <hr>
+            <ul>
+              <li>Good contrast vs noise</li>
+              <li>Breathing is not a huge factor in the pelvis</li>
+            </ul>
+            <img style="height:450px; width:auto" src="img/series_pelvic.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Fast Spin Echo</h3>
+            <hr>
+            <ul>
+              <li>After the first echo, 180° pulses are used to obtain a spin echo train.</li>
+              <li>This fills the other k-space lines in the same slice.</li>
+              <li>Reduced number of repetitions (TR) &rarr; k-space is filled faster and <strong class="fragment highlight-red">slice acquisition time is reduced.</strong></li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/fse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Fast Spin Echo</h3>
+            <hr>
+            <p>Put example here of good contrast vs LAVA</p>
+          </section>
+				</section>
+
+				<section style="text-align:left">
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_ssfse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <ul style="font-size:0.8em;">
+              <li>Motion-induced artifact is nearly absent because the center of k-space is sampled within a fraction of a second.</li>
+            </ul>
+            <img src="img/series_ssfse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <ul>
+              <li>The echo train technique can be used to fill the entire Fourier plane with a single 90° pulse.</li>
+              <li>Requires the application of as many 180° pulses as there are k-space lines to fill, can be &gt;256</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/fse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <ul>
+              <li>These also employ partial k-space acquisition.</li>
+              <li>Just over half the k-space lines are acquired and the missing lines are calculated using k-space symmetry properties.</li>
+              <li>This reduces acquisition time by a factor ~2, but degrades SNR of the image.</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto"src="img/fse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto; height:550px; width:auto;" src="img/adrenals_ssfse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto; height:550px; width:auto;" src="img/stone_ssfse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">MRCP (SSFSE)</h3>
+            <hr>
+            <ul>
+
+            </ul>
+
+          </section>
+				</section>
+
+        <section style="text-align:left">
+          <section>
+            <h3 style="text-align:center">Gradient Echo</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_gre.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Gradient Echo</h3>
+            <hr>
+            <ul>
+              <li>The gradient echo sequence differs from the SE sequence in regard to:
+              <ul>
+                <li>The flip angle usually below 90°</li>
+                <li>The absence of a 180° RF refocusing pulse; a dephasing gradient is used instead to produce an echo</li>
+              </ul></li>
+              <li>A flip angle lower than 90° decreases the amount of magnetization tipped into the transverse plane and gives a faster recovery of longitudinal
+              magnetization that allows shorter TR/TE and decreases scan time.</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/gre.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Residual Transverse Magnetization</h3>
+            <hr>
+            <ul>
+              <li>In GRE, TR reduction below the time constant T2 may cause permanent residual transverse magnetization.</li>
+              <li>The transverse magnetization will not have completely disappeared at the onset of the following repetition and will also be submitted to the excitation pulse.</li>
+              <li>Two main classes of GRE sequence depending on how residual transverse magnetiztion is managed:
+              <ul>
+                <li>Spoiled residual transverse magnetization</li>
+                <li>Steady state GRE sequences that conserve residual transverse magnetization and therefore participate in the signal.</li>
+              </ul></li>
+            </ul>
+          </section>
+          <section>
+            <h3 style="text-align:center">Spoiled gradient echo sequences</h3>
+            <hr>
+            <ul>
+              <li>The residual transverse magnetization can be detrimental for T1 sequences.</li>
+              <li>Gradients and/or RF pulses (spoilers) are used to eliminate residual transverse magnetization.</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/sgre.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Spoiled gradient echo sequences</h3>
+            <hr>
+            <p>Image weighting depends on the flip angle for T1 weighting; the greater the angle, the more T1 weighting</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">In and Out of Phase</h3>
+            <hr>
+            <ul>
+              <li>The in-phase sequence is T1-weighted with sensitivity to susceptibility artifact. </li>
+              <li>Most T1 sequences in body imaging are GE and inherently possess sensitivity to susceptibility artifact.</li>
+              <li>The in-phase sequence benefits from a reference standard in the out of phase sequence a relatively long TE.</li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/in_out_timings.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">In and Out of Phase</h3>
+            <hr>
+            <ul>
+              <li>The out-of-phase sequence is T1-weighted sequence with sensitivity to microscopic fat. </li>
+              <li>Wherever fat and water protons coexist, destructive interference and signal loss occurs.</li>
+              <li>"India Ink" artifact at water-rich and fat interfaces.</li>
+            </ul>
+          </section>
+          <section>
+            <h3 style="text-align:center">In and Out of Phase</h3>
+            <hr>
+            <p style="text-align:center">Adenoma</p>
+            <img style="height:550px; width:auto; display:block; margin-left:auto; margin-right:auto" src="img/adenoma_in_out_phase.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">In and Out of Phase</h3>
+            <hr>
+            <p>100197955 - fatty liver</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">Ultrafast spoiled gradient echo sequences</h3>
+            <hr>
+            <ul>
+              <li>Use a small flip angle, a very short TR and optimized k-space filling to reduce acquisition time. </li>
+              <li>The drawback of a small flip angle and very short TR is poor T1-weighting.</li>
+              <li>To preserve T1, a 180° inversion pulse prepares magnetization before repetitions of the ultrafast gradient echo imagery sequence. </li>
+            </ul>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/ufgre.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Ultrafast spoiled gradient echo sequences</h3>
+            <hr>
+            <p>100282554 - FSPGR</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">LAVA</h3>
+            <hr>
+            <span style="font-size:0.9em;">
+              <ul>
+                <li>LAVA &rarr; Liver Acquisition with Volume Acceleration</li>
+                <li>T1 sequence based on a 3D spoiled gradient echo pulse sequence. </li>
+                <li>Shorter TR/TE enables short breath holds for dynamic liver imaging with multiple phases.</li>
+                <li>Single breath hold for the whole sequence; &lt; 20 seconds.</li>
+              </ul>
+            </span>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_lava.png">
+          </section>
+          <section>
+            <h3>LAVA</h3>
+            <p>100255615 - take clips through pancreas</p>
+            <li></li>
+          </section>
+          <section style="text-align:center">
+            <h3 style="text-align:center">LAVA</h3>
+            <hr>
+            <p>Endometrioma</p>
+            <video controls>
+              <source src="vid/endometrioma_lava.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section>
+            <h3 style="text-align:center">Steady-State Gradient Echo</h3>
+            <hr>
+            <ul>
+              <li>In steady state GRE sequences, residual transverse magnetization is conserved. </li>
+              <li>By maintaining residual transverse magnetization, excitation pulses will produce new echos (Hahn echos, stimulated echos) in addition to the
+              gradient echo that depends on the free precession signal (FID).</li>
+              <li>There are several variants in the family of steady state gradient echo sequences, according to the type of echo recorded (which determines
+              contrast) and how the gradients are adjusted.</li>
+            </ul>
+          </section>
+          <section>
+            <h3 style="text-align:center">Balanced Steady State Free Precession (FIESTA)</h3>
+            <hr>
+            <p>FIESTA = fast imaging employing steady-state aquisition</p>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_fiesta.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Balanced Steady State Free Precession (FIESTA)</h3>
+            <hr>
+            <ul>
+              <li>The steady state is sensitive to dephasing caused by flow.</li>
+              <li>By applying balanced and symmetrical gradients in the 3 spatial directions, phase shifts induced by flow at constant speed are nulled. </li>
+              <li>FIESTA has good liquid/tissue contrast.</li>
+            </ul>
+          </section>
+          <section>
+            <h3 style="text-align:center">Balanced Steady State Free Precession (FIESTA)</h3>
+            <p>100215044 - good </p>
+
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h3>Diffusion Weighted Imaging</h3>
+            <hr>
+            <ul>
+              <li>Focuses on the random Brownian motion of the water molecules inside voxels. </li>
+              <li>These motions encounter different obstacles in the body (cell membranes, proteins, macromolecules, fibers), which vary according to the
+              tissues and certain pathological conditions (edema, abscess, tumors).</li>
+              <li>Good for lymph nodes, masses, abscesses.</li>
+            </ul>
+          </section>
+          <section>
+            <video controls>
+              <source src="vid/lymphoma_1.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section>
+            <video controls>
+              <source src="vid/lymphoma_2.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section>
+            <video controls>
+              <source src="vid/lymphoma_3.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+        </section>
+
+				<section>
+					<section id="fragments">
+						<h2>Fragments</h2>
+						<p>Hit the next arrow...</p>
+						<p class="fragment">... to step through ...</p>
+						<p><span class="fragment">... a</span> <span class="fragment">fragmented</span> <span class="fragment">slide.</span></p>
+
+						<aside class="notes">
+							This slide has fragments which are also stepped through in the notes window.
+						</aside>
+					</section>
+					<section>
+						<h2>Fragment Styles</h2>
+						<p>There's different types of fragments, like:</p>
+						<p class="fragment grow">grow</p>
+						<p class="fragment shrink">shrink</p>
+						<p class="fragment fade-out">fade-out</p>
+						<p class="fragment current-visible">current-visible</p>
+						<p class="fragment highlight-red">highlight-red</p>
+						<p class="fragment highlight-blue">highlight-blue</p>
+					</section>
+				</section>
+
+				<section id="transitions">
+					<h2>Transition Styles</h2>
+					<p>
+						You can select from different transitions, like: <br>
+						<a href="?transition=none#/transitions">None</a> -
+						<a href="?transition=fade#/transitions">Fade</a> -
+						<a href="?transition=slide#/transitions">Slide</a> -
+						<a href="?transition=convex#/transitions">Convex</a> -
+						<a href="?transition=concave#/transitions">Concave</a> -
+						<a href="?transition=zoom#/transitions">Zoom</a>
+					</p>
+				</section>
+
+				<section id="themes">
+					<h2>Themes</h2>
+					<p>
+						reveal.js comes with a few themes built in: <br>
+						<!-- Hacks to swap themes after the page has loaded. Not flexible and only intended for the reveal.js demo deck. -->
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black (default)</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/sky.css'); return false;">Sky</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/beige.css'); return false;">Beige</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/simple.css'); return false;">Simple</a> <br>
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/serif.css'); return false;">Serif</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/blood.css'); return false;">Blood</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/night.css'); return false;">Night</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/moon.css'); return false;">Moon</a> -
+						<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a>
+					</p>
+				</section>
+
+				<section>
+					<section data-background="#dddddd">
+						<h2>Slide Backgrounds</h2>
+						<p>
+							Set <code>data-background="#dddddd"</code> on a slide to change the background color. All CSS color formats are supported.
+						</p>
+						<a href="#" class="navigate-down">
+							<img width="178" height="238" data-src="https://s3.amazonaws.com/hakim-static/reveal-js/arrow.png" alt="Down arrow">
+						</a>
+					</section>
+					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png">
+						<h2>Image Backgrounds</h2>
+						<pre><code>&lt;section data-background="image.png"&gt;</code></pre>
+					</section>
+					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png" data-background-repeat="repeat" data-background-size="100px">
+						<h2>Tiled Backgrounds</h2>
+						<pre><code style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code></pre>
+					</section>
+					<section data-background-video="https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.mp4,https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.webm" data-background-color="#000000">
+						<div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
+							<h2>Video Backgrounds</h2>
+							<pre><code style="word-wrap: break-word;">&lt;section data-background-video="video.mp4,video.webm"&gt;</code></pre>
+						</div>
+					</section>
+					<section data-background="http://i.giphy.com/90F8aUepslB84.gif">
+						<h2>... and GIFs!</h2>
+					</section>
+				</section>
+
+				<section data-transition="slide" data-background="#4d7e65" data-background-transition="zoom">
+					<h2>Background Transitions</h2>
+					<p>
+						Different background transitions are available via the backgroundTransition option. This one's called "zoom".
+					</p>
+					<pre><code>Reveal.configure({ backgroundTransition: 'zoom' })</code></pre>
+				</section>
+
+				<section data-transition="slide" data-background="#b5533c" data-background-transition="zoom">
+					<h2>Background Transitions</h2>
+					<p>
+						You can override background transitions per-slide.
+					</p>
+					<pre><code style="word-wrap: break-word;">&lt;section data-background-transition="zoom"&gt;</code></pre>
+				</section>
+
+				<section>
+					<h2>Pretty Code</h2>
+					<pre><code data-trim contenteditable>
+function linkify( selector ) {
+  if( supports3DTransforms ) {
+
+    var nodes = document.querySelectorAll( selector );
+
+    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
+      var node = nodes[i];
+
+      if( !node.className ) {
+        node.className += ' roll';
+      }
+    }
+  }
+}
+					</code></pre>
+					<p>Code syntax highlighting courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>
+				</section>
+
+				<section>
+					<h2>Marvelous List</h2>
+					<ul>
+						<li>No order here</li>
+						<li>Or here</li>
+						<li>Or here</li>
+						<li>Or here</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Fantastic Ordered List</h2>
+					<ol>
+						<li>One is smaller than...</li>
+						<li>Two is smaller than...</li>
+						<li>Three!</li>
+					</ol>
+				</section>
+
+				<section>
+					<h2>Tabular Tables</h2>
+					<table>
+						<thead>
+							<tr>
+								<th>Item</th>
+								<th>Value</th>
+								<th>Quantity</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Apples</td>
+								<td>$1</td>
+								<td>7</td>
+							<tr>
+							<tr>
+								<td>Lemonade</td>
+								<td>$2</td>
+								<td>18</td>
+							<tr>
+							<tr>
+								<td>Bread</td>
+								<td>$3</td>
+								<td>2</td>
+							<tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section>
+					<h2>Clever Quotes</h2>
+					<p>
+						These guys come in two forms, inline: <q cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
+						&ldquo;The nice thing about standards is that there are so many to choose from&rdquo;</q> and block:
+					</p>
+					<blockquote cite="http://searchservervirtualization.techtarget.com/definition/Our-Favorite-Technology-Quotations">
+						&ldquo;For years there has been a theory that millions of monkeys typing at random on millions of typewriters would
+						reproduce the entire works of Shakespeare. The Internet has proven this theory to be untrue.&rdquo;
+					</blockquote>
+				</section>
+
+				<section>
+					<h2>Intergalactic Interconnections</h2>
+					<p>
+						You can link between slides internally,
+						<a href="#/2/3">like this</a>.
+					</p>
+				</section>
+
+				<section>
+					<h2>Speaker View</h2>
+					<p>There's a <a href="https://github.com/hakimel/reveal.js#speaker-notes">speaker view</a>. It includes a timer, preview of the upcoming slide as well as your speaker notes.</p>
+					<p>Press the <em>S</em> key to try it out.</p>
+
+					<aside class="notes">
+						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
+					</aside>
+				</section>
+
+				<section>
+					<h2>Export to PDF</h2>
+					<p>Presentations can be <a href="https://github.com/hakimel/reveal.js#pdf-export">exported to PDF</a>, here's an example:</p>
+					<iframe src="//www.slideshare.net/slideshow/embed_code/42840540" width="445" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:3px solid #666; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+				</section>
+
+				<section>
+					<h2>Global State</h2>
+					<p>
+						Set <code>data-state="something"</code> on a slide and <code>"something"</code>
+						will be added as a class to the document element when the slide is open. This lets you
+						apply broader style changes, like switching the page background.
+					</p>
+				</section>
+
+				<section data-state="customevent">
+					<h2>State Events</h2>
+					<p>
+						Additionally custom events can be triggered on a per slide basis by binding to the <code>data-state</code> name.
+					</p>
+					<pre><code class="javascript" data-trim contenteditable style="font-size: 18px;">
+Reveal.addEventListener( 'customevent', function() {
+	console.log( '"customevent" has fired' );
+} );
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Take a Moment</h2>
+					<p>
+						Press B or . on your keyboard to pause the presentation. This is helpful when you're on stage and want to take distracting slides off the screen.
+					</p>
+				</section>
+
+				<section>
+					<h2>Much more</h2>
+					<ul>
+						<li>Right-to-left support</li>
+						<li><a href="https://github.com/hakimel/reveal.js#api">Extensive JavaScript API</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#auto-sliding">Auto-progression</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#parallax-background">Parallax backgrounds</a></li>
+						<li><a href="https://github.com/hakimel/reveal.js#keyboard-bindings">Custom keyboard bindings</a></li>
+					</ul>
+				</section>
+
+				<section style="text-align: left;">
+          What is SPGR and FIRM used for?
+
+        </section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
