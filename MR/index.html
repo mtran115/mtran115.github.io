@@ -4,10 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>reveal.js - The HTML Presentation Framework</title>
-
-		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
-		<meta name="author" content="Hakim El Hattab">
+		<title>MR Body Presentation</title>
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -50,7 +47,7 @@
 
 				<section style="text-align:left">
 					<h2>Outline</h2>
-          <ul class="fragment">
+          <ul>
             <li class="fragment">Basic MR Physics</li>
             <li class="fragment">Spin Echo Sequences
             <ul>
@@ -66,13 +63,13 @@
               <li class="fragment">FIESTA</li>
             </ul></li>
             <li class="fragment">DWI</li>
+            <li class="fragment">Not covering dynamic imaging with contrast</li>
           </ul>
 				</section>
 
-				<!-- Example of nested vertical slides -->
 				<section style="text-align:left">
 					<section>
-            <h3 style="text-align:center">MR Physics</h3>
+            <h3 style="text-align:center">Basic MR Physics</h3>
             <hr>
             <p>Protons (hydrogen atoms) have a property called nuclear spin. They behave like tiny rotating magnets.</p>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/spin.gif">
@@ -84,7 +81,7 @@
               <li>Within a large external magnetic field (called B0), nuclear spins align with the external field. </li>
               <li>Some of the spins align with the field (parallel) and some align against the field (anti-parallel).</li>
             </ul>
-            <img style="height:280px; width:auto;" src="img/align.png">
+            <img style="height:280px; width:auto; display:block; margin-left:auto; margin-right:auto" src="img/align.png">
           </section>
           <section>
             <h3 style="text-align:center">Precession</h3>
@@ -118,7 +115,7 @@
               <li>Contains raw data from the scan, after an inverse Fourier transform is performed on this data, images are produced.</li>
               <li>Data at the center of k-space contains information about contrast.</li>
             </ul>
-            <img style="height:450px; width:auto;" src="img/kspace.png">
+            <img style="height:450px; width:auto; display:block; margin-left:auto; margin-right:auto" src="img/kspace.png">
           </section>
 				</section>
 
@@ -140,6 +137,11 @@
               <li>When the TE is long, T2 differences are highlighted.</li>
             </ul>
             <img src="img/contrast.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">GE &rarr; T1 / SE &rarr; T2 </h3>
+            <hr>
+            <img style="height:450px; width:auto; display:block; margin-left:auto; margin-right:auto" src="img/t1_t2.png">
           </section>
         </section>
 
@@ -168,24 +170,15 @@
           </section>
 				</section>
 
-        <section style="text-align:left">
-          <h3 style="text-align:center">Practical Take Home Points</h3>
-          <hr>
-          <ul>
-            <li>Ask for subtraction sequences</li>
-            <li>Look at all sequences, including DWI</li>
-            <li>We don't have Eovist, get 1 hr delays</li>
-          </ul>
-        </section>
 
 				<section style="text-align:left">
           <section>
             <h3 style="text-align:center">Spin Echo</h3>
             <hr>
             <ul>
-              <li>The spin echo sequence is made up of a series of events: 90° pulse, then 180° refocusing pulse, signal reading at TE.</li>
+              <li>Made up of: 90° pulse, then 180° refocusing pulse, signal reading at TE.</li>
               <li>This series is repeated at each time interval TR (repetition time).</li>
-              <li>With each repetition, a k-space line is filled.</li>
+              <li>With each repetition, a line in k-space is filled.</li>
             </ul>
             <img  style="display:block; margin-left:auto; margin-right:auto" src="img/spin_echo.png">
           </section>
@@ -196,7 +189,7 @@
           <section>
             <h3 style="text-align:center">Fast Spin Echo</h3>
             <hr>
-            <img src="img/mr_acronyms_fse.png">
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_fse.png">
           </section>
           <section style="text-align:left">
             <h3 style="text-align:center">Fast Spin Echo</h3>
@@ -217,10 +210,10 @@
             </ul>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/fse.png">
           </section>
-          <section>
+          <section style="text-align:center">
             <h3 style="text-align:center">Fast Spin Echo</h3>
             <hr>
-            <p>Put example here of good contrast vs LAVA</p>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/lava_fse.png">
           </section>
 				</section>
 
@@ -253,9 +246,13 @@
             <ul>
               <li>These also employ partial k-space acquisition.</li>
               <li>Just over half the k-space lines are acquired and the missing lines are calculated using k-space symmetry properties.</li>
-              <li>This reduces acquisition time by a factor ~2, but degrades SNR of the image.</li>
             </ul>
             <img style="display:block; margin-left:auto; margin-right:auto"src="img/fse.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <p>video of coronals lava vs ssfse - 100193459</p>
           </section>
           <section>
             <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
@@ -271,9 +268,26 @@
             <h3 style="text-align:center">MRCP (SSFSE)</h3>
             <hr>
             <ul>
-
+              <li>Dramatically increasing the TE results in extreme T2-weighting and T2 decay of all substances except free water protons.</li>
+              <li>Fluid in bile ducts, gallbladder, and the pancreatic duct are bright.</li>
+              <li>Typically takes 5-6 minutes and respiratory gating is used.</li>
+              <li>Acquired in thin sections and as a thick radial slab.</li>
             </ul>
-
+          </section>
+          <section>
+            <h3 style="text-align:center">MRCP (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto; height:550px; width:auto;" src="img/biliary_tree_1.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">MRCP (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto; height:550px; width:auto;" src="img/biliary_tree_2.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">MRCP (SSFSE)</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto; height:550px; width:auto;" src="img/cbd_stone.png">
           </section>
 				</section>
 
@@ -331,6 +345,7 @@
               <li>The in-phase sequence is T1-weighted with sensitivity to susceptibility artifact. </li>
               <li>Most T1 sequences in body imaging are GE and inherently possess sensitivity to susceptibility artifact.</li>
               <li>The in-phase sequence benefits from a reference standard in the out of phase sequence a relatively long TE.</li>
+              <li>Metals and gas artifacts get worse.</li>
             </ul>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/in_out_timings.png">
           </section>
@@ -343,16 +358,20 @@
               <li>"India Ink" artifact at water-rich and fat interfaces.</li>
             </ul>
           </section>
+          <section style="text-align:center">
+            <h3 style="text-align:center">In and Out of Phase</h3>
+            <hr>
+            <video controls>
+              <source src="vid/fatty_liver.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
           <section>
             <h3 style="text-align:center">In and Out of Phase</h3>
             <hr>
             <p style="text-align:center">Adenoma</p>
             <img style="height:550px; width:auto; display:block; margin-left:auto; margin-right:auto" src="img/adenoma_in_out_phase.png">
-          </section>
-          <section>
-            <h3 style="text-align:center">In and Out of Phase</h3>
-            <hr>
-            <p>100197955 - fatty liver</p>
           </section>
           <section>
             <h3 style="text-align:center">Ultrafast spoiled gradient echo sequences</h3>
@@ -364,10 +383,15 @@
             </ul>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/ufgre.png">
           </section>
-          <section>
+          <section style="text-align:center">
             <h3 style="text-align:center">Ultrafast spoiled gradient echo sequences</h3>
             <hr>
-            <p>100282554 - FSPGR</p>
+            <p>FSPGR</p>
+            <video controls>
+              <source src="vid/fspgr.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
           </section>
           <section>
             <h3 style="text-align:center">LAVA</h3>
@@ -423,10 +447,14 @@
               <li>FIESTA has good liquid/tissue contrast.</li>
             </ul>
           </section>
-          <section>
+          <section style="text-align:center">
             <h3 style="text-align:center">Balanced Steady State Free Precession (FIESTA)</h3>
-            <p>100215044 - good </p>
-
+            <hr>
+            <video controls>
+              <source src="vid/fiesta.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
           </section>
         </section>
 
@@ -464,23 +492,15 @@
           </section>
         </section>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <section style="text-align:left">
+          <h3 style="text-align:center">Practical Take Home Points</h3>
+          <hr>
+          <ul>
+            <li>Look at all sequences, including DWI</li>
+            <li>Ask for subtraction sequences</li>
+            <li>We don't have Eovist, get 1 hr delays</li>
+          </ul>
+        </section>
 
 
 			</div>
