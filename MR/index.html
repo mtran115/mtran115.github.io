@@ -315,12 +315,12 @@
             <h3 style="text-align:center">Residual Transverse Magnetization</h3>
             <hr>
             <ul>
-              <li>In GRE, TR reduction below the time constant T2 may cause permanent residual transverse magnetization.</li>
+              <li>In GE, TR reduction below the time constant T2 may cause permanent residual transverse magnetization.</li>
               <li>The transverse magnetization will not have completely disappeared at the onset of the following repetition and will also be submitted to the excitation pulse.</li>
-              <li>Two main classes of GRE sequence depending on how residual transverse magnetiztion is managed:
+              <li>Two main classes of GE sequence depending on how residual transverse magnetiztion is managed:
               <ul>
-                <li>Spoiled residual transverse magnetization</li>
-                <li>Steady state GRE sequences that conserve residual transverse magnetization and therefore participate in the signal.</li>
+                <li>Spoiled Gradient Echo &rarr; spoiler</li>
+                <li>Steady state GE &rarr; conserve residual transverse magnetization which participates in the signal.</li>
               </ul></li>
             </ul>
           </section>
@@ -355,7 +355,7 @@
             <ul>
               <li>The out-of-phase sequence is T1-weighted sequence with sensitivity to microscopic fat. </li>
               <li>Wherever fat and water protons coexist, destructive interference and signal loss occurs.</li>
-              <li>"India Ink" artifact at water-rich and fat interfaces.</li>
+              <li>"India Ink" artifact at water-rich tissue and fat-rich tissue interfaces.</li>
             </ul>
           </section>
           <section style="text-align:center">
@@ -409,6 +409,7 @@
           <section>
             <h3>LAVA</h3>
             <p>100255615 - take clips through pancreas</p>
+            <p>100213142 - panc mass, use the lava and ssfse to compare</p>
             <li></li>
           </section>
           <section style="text-align:center">
@@ -425,9 +426,12 @@
             <h3 style="text-align:center">Steady-State Gradient Echo</h3>
             <hr>
             <ul>
-              <li>In steady state GRE sequences, residual transverse magnetization is conserved. </li>
-              <li>By maintaining residual transverse magnetization, excitation pulses will produce new echos (Hahn echos, stimulated echos) in addition to the
-              gradient echo that depends on the free precession signal (FID).</li>
+              <li>In steady state GE sequences, residual transverse magnetization is conserved. </li>
+              <li>At steady state, two signal types are present:
+              <ol>
+                <li>T1/T2* weighted: the mixed steady-state signal which generates the FID (typical of a GE sequence)</li>
+                <li>T2 weighted: the residual Mxy at the beginning of the next pulse; the α flip results in spin-echo</li>
+              </ol></li>
               <li>There are several variants in the family of steady state gradient echo sequences, according to the type of echo recorded (which determines
               contrast) and how the gradients are adjusted.</li>
             </ul>
@@ -496,12 +500,16 @@
           <h3 style="text-align:center">Practical Take Home Points</h3>
           <hr>
           <ul>
+            <li>Typically GE &rarr; T1 and SE &rarr; T2</li>
             <li>Look at all sequences, including DWI</li>
             <li>Ask for subtraction sequences</li>
-            <li>We don't have Eovist, get 1 hr delays</li>
+            <li>We don't have Eovist for adenoma vs FNH, get 1 hr delays</li>
           </ul>
         </section>
 
+        <section>
+          <h2>Questions?</h2>
+        </section>
 
 			</div>
 
