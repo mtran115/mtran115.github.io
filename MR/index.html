@@ -63,7 +63,6 @@
               <li class="fragment">FIESTA</li>
             </ul></li>
             <li class="fragment">DWI</li>
-            <li class="fragment">Not covering dynamic imaging with contrast</li>
           </ul>
 				</section>
 
@@ -97,6 +96,21 @@
             <h3 style="text-align:center">Larmor Frequency</h3>
             <hr>
             <p>Remember that the RF pulse must match the Larmor frequency exactly for the proton to be able to "excited" by the pulse.</p>
+          </section>
+          <section>
+            <h3 style="text-align:center">T1 Relaxation</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/t1_relax_1.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">T1 Relaxation</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/t1_relax_2.png">
+          </section>
+          <section>
+            <h3 style="text-align:center">T2 Relaxation</h3>
+            <hr>
+            <img style="display:block; margin-left:auto; margin-right:auto" src="img/t2_relax.png">
           </section>
           <section>
             <h3 style="text-align:center">Gradients</h3>
@@ -191,15 +205,6 @@
             <hr>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_fse.png">
           </section>
-          <section style="text-align:left">
-            <h3 style="text-align:center">Fast Spin Echo</h3>
-            <hr>
-            <ul>
-              <li>Good contrast vs noise</li>
-              <li>Breathing is not a huge factor in the pelvis</li>
-            </ul>
-            <img style="height:450px; width:auto" src="img/series_pelvic.png">
-          </section>
           <section>
             <h3 style="text-align:center">Fast Spin Echo</h3>
             <hr>
@@ -209,6 +214,15 @@
               <li>Reduced number of repetitions (TR) &rarr; k-space is filled faster and <strong class="fragment highlight-red">slice acquisition time is reduced.</strong></li>
             </ul>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/fse.png">
+          </section>
+          <section style="text-align:left">
+            <h3 style="text-align:center">Fast Spin Echo</h3>
+            <hr>
+            <ul>
+              <li>Good contrast vs noise</li>
+              <li>Breathing is not a huge factor in the pelvis</li>
+            </ul>
+            <img style="height:450px; width:auto" src="img/series_pelvic.png">
           </section>
           <section style="text-align:center">
             <h3 style="text-align:center">Fast Spin Echo</h3>
@@ -222,14 +236,6 @@
             <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
             <hr>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_ssfse.png">
-          </section>
-          <section>
-            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
-            <hr>
-            <ul style="font-size:0.8em;">
-              <li>Motion-induced artifact is nearly absent because the center of k-space is sampled within a fraction of a second.</li>
-            </ul>
-            <img src="img/series_ssfse.png">
           </section>
           <section>
             <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
@@ -252,7 +258,28 @@
           <section>
             <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
             <hr>
-            <p>video of coronals lava vs ssfse - 100193459</p>
+            <ul style="font-size:0.8em;">
+              <li>Increased speed &rarr; reduced motion-induced artifact.</li>
+            </ul>
+            <img src="img/series_ssfse.png">
+          </section>
+          <section style="text-align:center">
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <video controls>
+              <source src="vid/ssfse_motion.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section style="text-align:center">
+            <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
+            <hr>
+            <video controls>
+              <source src="vid/lava_motion.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
           </section>
           <section>
             <h3 style="text-align:center">Single Shot Fast Spin Echo (SSFSE)</h3>
@@ -315,9 +342,9 @@
             <h3 style="text-align:center">Residual Transverse Magnetization</h3>
             <hr>
             <ul>
-              <li>In GE, TR reduction below the time constant T2 may cause permanent residual transverse magnetization.</li>
+              <li>In GE, TR reduction below the time constant T2 causes permanent residual transverse magnetization.</li>
               <li>The transverse magnetization will not have completely disappeared at the onset of the following repetition and will also be submitted to the excitation pulse.</li>
-              <li>Two main classes of GE sequence depending on how residual transverse magnetiztion is managed:
+              <li>Two main classes of GE sequence depending on how residual transverse magnetization is managed:
               <ul>
                 <li>Spoiled Gradient Echo &rarr; spoiler</li>
                 <li>Steady state GE &rarr; conserve residual transverse magnetization which participates in the signal.</li>
@@ -325,7 +352,7 @@
             </ul>
           </section>
           <section>
-            <h3 style="text-align:center">Spoiled gradient echo sequences</h3>
+            <h3 style="text-align:center">Spoiled gradient echo </h3>
             <hr>
             <ul>
               <li>The residual transverse magnetization can be detrimental for T1 sequences.</li>
@@ -334,27 +361,36 @@
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/sgre.png">
           </section>
           <section>
-            <h3 style="text-align:center">Spoiled gradient echo sequences</h3>
+            <h3 style="text-align:center">Spoiled gradient echo </h3>
             <hr>
             <p>Image weighting depends on the flip angle for T1 weighting; the greater the angle, the more T1 weighting</p>
           </section>
           <section>
             <h3 style="text-align:center">In and Out of Phase</h3>
             <hr>
-            <ul>
-              <li>The in-phase sequence is T1-weighted with sensitivity to susceptibility artifact. </li>
-              <li>Most T1 sequences in body imaging are GE and inherently possess sensitivity to susceptibility artifact.</li>
-              <li>The in-phase sequence benefits from a reference standard in the out of phase sequence a relatively long TE.</li>
-              <li>Metals and gas artifacts get worse.</li>
-            </ul>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/in_out_timings.png">
           </section>
           <section>
-            <h3 style="text-align:center">In and Out of Phase</h3>
+            <h3 style="text-align:center">In Phase</h3>
             <hr>
             <ul>
-              <li>The out-of-phase sequence is T1-weighted sequence with sensitivity to microscopic fat. </li>
+              <li>T1-weighted with sensitivity to susceptibility artifact. </li>
+              <li>Most T1 sequences in body imaging are GE and inherently possess sensitivity to susceptibility artifact.</li>
+              <li>The in-phase sequence benefits from:
+              <ul>
+                <li>A reference standard (out of phase sequence) </li>
+                <li>A relatively long TE</li>
+              </ul></li>
+              <li>Metals and gas artifacts get worse.</li>
+            </ul>
+          </section>
+          <section>
+            <h3 style="text-align:center">Out of Phase</h3>
+            <hr>
+            <ul>
+              <li>T1-weighted sequence with sensitivity to microscopic fat. </li>
               <li>Wherever fat and water protons coexist, destructive interference and signal loss occurs.</li>
+              <li>Most commonly used for hepatic steatosis, also for hemochromatosis.</li>
               <li>"India Ink" artifact at water-rich tissue and fat-rich tissue interfaces.</li>
             </ul>
           </section>
@@ -406,11 +442,32 @@
             </span>
             <img style="display:block; margin-left:auto; margin-right:auto" src="img/mr_acronyms_lava.png">
           </section>
-          <section>
+          <section style="text-align:center">
             <h3>LAVA</h3>
-            <p>100255615 - take clips through pancreas</p>
-            <p>100213142 - panc mass, use the lava and ssfse to compare</p>
-            <li></li>
+            <hr>
+            <video controls>
+              <source src="vid/panc.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section style="text-align:center">
+            <h3>LAVA</h3>
+            <hr>
+            <video controls>
+              <source src="vid/panc_mass_1.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
+          </section>
+          <section style="text-align:center">
+            <h3>LAVA</h3>
+            <hr>
+            <video controls>
+              <source src="vid/panc_mass_2.mp4" type="video/mp4">
+              I'm sorry; your browser doesn't support HTML5 video in WebM with VP8 or MP4 with H.264.
+              <!-- You can embed a Flash player here, to play your mp4 video in older browsers -->
+            </video>
           </section>
           <section style="text-align:center">
             <h3 style="text-align:center">LAVA</h3>
@@ -497,7 +554,7 @@
         </section>
 
         <section style="text-align:left">
-          <h3 style="text-align:center">Practical Take Home Points</h3>
+          <h3 style="text-align:center">Take Home Points</h3>
           <hr>
           <ul>
             <li>Typically GE &rarr; T1 and SE &rarr; T2</li>
