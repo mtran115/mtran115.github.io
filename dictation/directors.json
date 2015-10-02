@@ -10,5 +10,27 @@ var directors = [{dir:'An endotracheal tube is seen with the distal tip above th
 ,{dir:'A milk of calcium cyst versus a cyst with calcified wall is seen. ', fb:'', movies:''}
 ,{dir:'There is hard and soft plaque at the origin of the left internal carotid artery without evidence of hemodynamically significant stenosis. ', fb:'', movies:''}
 ,{dir:'There are multiple prominent air-filled segments of small bowel with gas seen distally in the colon and rectum which may represent ileus vs. early/partial small bowel obstruction. ', fb:'', movies:''}
+,{dir:'There is persistent distension of bowel.', fb:'', movies:''}
+,{dir:'An enteric tube is seen with the distal tip and side port projecting over the stomach.', fb:'', movies:''}
+,{dir:'with adjacent areas of gas consistent with a laceration. ', fb:'', movies:''}
 ,{dir:'An external ventricular drain (EVD) is seen with the distal tip in the region of the 3rd ventricle.',fb:'/m/0ddjwzx',movies:''}
+,{dir:'Scattered soft tissue calcifications are seen likely representing injection granulomas. ', fb:'', movies:''}
+,{dir:'There is a dilated segment of jejunum near the anastomosis which may represent early/partial obstruction at the anastomosis vs. post surgical changes. ', fb:'', movies:''}
+,{dir:'Calcific densities project over the left upper abdomen which may represent splenic artery calcifications or pancreatic calcifications. ', fb:'', movies:''}
+,{dir:'There is a fracture of the right orbital floor involving the infraorbital canal. ', fb:'', movies:''}
+,{dir:'An external ventricular drain (EVD) is seen with the distal tip in the region of the 3rd ventricle. ', fb:'', movies:''}
+,{dir:'The C2-C3 vertebral bodies appear fused, likely secondary to failure of segmentation. ', fb:'', movies:''}
+,{dir:'Mucosal thickening versus a mucous retention cyst is seen in the right maxillary sinus. The paranasal sinuses are otherwise clear. ', fb:'', movies:''}
+,{dir:'A well circumscribed lytic lesion with thickened trabeculae is seen in the C5 vertebral body likely representing a hemangioma. ', fb:'', movies:''}
+,{dir:'An extra-axial collection along the right convexity may represent a subdural hygroma versus chronic subdural hematoma. ', fb:'', movies:''}
+,{dir:'There is enlargement of both the medial and lateral left rectus muscles with fat stranding and orbital emphysema which may represent an optic nerve sheath hematoma. ', fb:'', movies:''}
+,{dir:'There is right proptosis with a hyperdensity at the site of fracture which may represent an extraconal hematoma. ', fb:'', movies:''}
+,{dir:'Punctate parenchymal calcifications may represent sequela of prior infection such as neurocysticercosis. ', fb:'', movies:''}
+,{dir:'There is evidence of a right craniotomy with post surgical changes along the surgical site. A small hyperdensity may represent a small acute hemorrhage. ', fb:'', movies:''}
+,{dir:'A radiopaque clip is seen in the expected region of the right middle cerebral artery. ', fb:'', movies:''}
+,{dir:'Few prominent bilateral inguinal lymph nodes are seen which are likely reactive secondary to inflammatory changes within the anterior inferior abdominal wall including overlying skin thickening, subcutaneous edema and a poorly defined 3.0 cm fluid collection located within the subcutaneous fat with extension to the skin surface. The fluid collection is approximately 4.4 cm in maximum depth but does not abut the underlying rectus musculature or nor does not extend into the peritoneal cavity. ', fb:'', movies:''}
+,{dir:'There are multiple ill-defined masses within the perihepatic space extending into the periportal space; some of these masses encase and narrow the right hepatic vein. For example, a 4.3cm mass abuts the right hepatic vein and inferior vena cava. ', fb:'', movies:''}
+,{dir:'Again seen is severe degenerative changes changes of the hip joints bilaterally with bone on bone articulation on the right. Subchondral fibrocystic changes seen within the right femur. Again seen are osteophytes and a bony protuberance along the right femoral head and neck junction which may related to a CAM deformity.', fb:'', movies:''}
+,{dir:'There is focal hypoattenuation subjacent superior aspect of the head of the caudate and lateral aspect right basal ganglia suggesting encephalomalacia remote ischemic change versus remote lacunar ischemic change.', fb:'', movies:''}
+,{dir:'Comminuted fractures are seen within the mandible. One fracture at the distal right body/angle of the mandible extends to the root of tooth #32, which is also fractured. This fracture extends through the mandibular canal on the right.', fb:'', movies:''}
 ];
