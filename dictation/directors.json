@@ -1,6 +1,14 @@
 var directors = [{dir:'An endotracheal tube is seen with the distal tip above the carina.',fb:'/m/05x5_p2',movies:''}
 ,{dir:'Atherosclerotic Vascular within the aorta and it\'s branches without aneurysmal dilatation',fb:'/m/04zlzb0',movies:''}
 ,{dir:'There are fractures of the lateral, medial and anterior right maxillary sinus walls associated with a minimal amount of adjacent gas.',fb:'/m/04zlzb0',movies:''}
+,{dir:'There is interval increase in bilateral pulmonary opacities.', fb:'', movies:''}
 ,{dir:'There is a fracture of the right nasal process of the maxilla.',fb:'/m/067_lx',movies:''}
+,{dir:'The right kidney is echogenic suggestive of medical renal parenchymal disease.', fb:'', movies:''}
+,{dir:'There is trace perinephric fluid; no discrete areas of absent power Doppler flow are identified. IMP: Ultrasound is not sensitive for the detection of pyelonephritis. ', fb:'', movies:''}
+,{dir:'There are two round isodense lesions in the right hepatic lobe; if the patient has no history of primary malignancy or chronic disease, these likely represent hemangiomas; consider ultrasound follow-up in 3-6 months to assess stability. ', fb:'', movies:''}
+,{dir:'Gallbladder polyps less than 5mm are noted; polyps of this size do not require follow-up. ', fb:'', movies:''}
+,{dir:'A milk of calcium cyst versus a cyst with calcified wall is seen. ', fb:'', movies:''}
+,{dir:'There is hard and soft plaque at the origin of the left internal carotid artery without evidence of hemodynamically significant stenosis. ', fb:'', movies:''}
+,{dir:'There are multiple prominent air-filled segments of small bowel with gas seen distally in the colon and rectum which may represent ileus vs. early/partial small bowel obstruction. ', fb:'', movies:''}
 ,{dir:'An external ventricular drain (EVD) is seen with the distal tip in the region of the 3rd ventricle.',fb:'/m/0ddjwzx',movies:''}
 ];
